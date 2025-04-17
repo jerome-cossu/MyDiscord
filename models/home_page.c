@@ -13,7 +13,6 @@ static void toggle_theme(GtkButton *button, gpointer user_data) {
     gtk_button_set_label(button, label);
 }
 
-
 void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *window;
     GtkWidget *outer_box;
@@ -47,13 +46,12 @@ void activate(GtkApplication *app, gpointer user_data) {
     gtk_widget_set_margin_end(main_box, 80);
     gtk_box_append(GTK_BOX(outer_box), main_box);
 
-    // Left side (sign up)
+    // Left side
     left_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 15);
     gtk_widget_set_hexpand(left_box, TRUE);
     gtk_widget_set_valign(left_box, GTK_ALIGN_CENTER);
     gtk_box_append(GTK_BOX(main_box), left_box);
 
-    // Ajout du titre pour la partie gauche
     GtkWidget *signup_title = gtk_label_new("Create Account");
     gtk_widget_set_halign(signup_title, GTK_ALIGN_CENTER);
     gtk_box_append(GTK_BOX(left_box), signup_title);
@@ -93,12 +91,12 @@ void activate(GtkApplication *app, gpointer user_data) {
     gtk_widget_set_size_request(signup_button, 200, -1);
     gtk_box_append(GTK_BOX(signup_box), signup_button);
 
-    // Separator (vertical line)
+    // Separator
     separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
     gtk_widget_set_vexpand(separator, TRUE);
     gtk_box_append(GTK_BOX(main_box), separator);
 
-    // Right side (login)
+    // Right side
     right_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 15);
     gtk_widget_set_hexpand(right_box, TRUE);
     gtk_widget_set_valign(right_box, GTK_ALIGN_CENTER);
