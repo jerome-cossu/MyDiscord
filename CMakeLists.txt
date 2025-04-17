@@ -14,7 +14,7 @@ set(SOURCES
     models/home_page.c
 )
 
-# Create executable file.exe
+# Create executable file (mydiscord.exe)
 add_executable(mydiscord ${SOURCES})
 
 # Add the necessary flags for GTK4
