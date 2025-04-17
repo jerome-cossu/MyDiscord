@@ -8,7 +8,7 @@ pkg_check_modules(GTK4 REQUIRED gtk4)
 # Include the models directory for header files
 include_directories(models)
 
-# Set source files in folder models/
+# Set source files
 set(SOURCES 
     main.c
     models/home_page.c
