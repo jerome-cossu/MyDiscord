@@ -13,6 +13,19 @@ static void toggle_theme(GtkButton *button, gpointer user_data) {
     gtk_button_set_label(button, label);
 }
 
+// Callback function to show/hide password in the signup form
+static void on_signup_show_password_toggled(GtkCheckButton *check_button, gpointer user_data) {
+    GtkEntry *entry = GTK_ENTRY(user_data);
+    gboolean active = gtk_check_button_get_active(check_button);
+    gtk_entry_set_visibility(entry, active);
+}
+// Callback function to show/hide password in the login form
+static void on_login_show_password_toggled(GtkCheckButton *check_button, gpointer user_data) {
+    GtkEntry *entry = GTK_ENTRY(user_data);
+    gboolean active = gtk_check_button_get_active(check_button);
+    gtk_entry_set_visibility(entry, active);
+}
+
 void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *window;
     GtkWidget *outer_box;
@@ -25,18 +38,20 @@ void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *bottom_box;
 
     GtkWidget *name_entry, *surname_entry, *nickname_entry, *email_entry, *signup_pass_entry, *signup_button;
-    GtkWidget *login_user_entry, *login_pass_entry, *login_button;
+    GtkWidget *signup_show_pass_check;
 
+    GtkWidget *login_user_entry, *login_pass_entry, *login_button;
+    GtkWidget *login_show_pass_check;
+
+    // Create a new window
     window = gtk_application_window_new(app);
     gtk_window_set_title(GTK_WINDOW(window), "Sign up or Log in - MyDiscord");
     gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
-    gtk_window_maximize(GTK_WINDOW(window));
 
-    // Global vertical layout
+
     outer_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_window_set_child(GTK_WINDOW(window), outer_box);
 
-    // Main horizontal box for content
     main_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 20);
     gtk_widget_set_hexpand(main_box, TRUE);
     gtk_widget_set_vexpand(main_box, TRUE);
@@ -46,7 +61,7 @@ void activate(GtkApplication *app, gpointer user_data) {
     gtk_widget_set_margin_end(main_box, 80);
     gtk_box_append(GTK_BOX(outer_box), main_box);
 
-    // Left side
+    // Create account part (left side)
     left_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 15);
     gtk_widget_set_hexpand(left_box, TRUE);
     gtk_widget_set_valign(left_box, GTK_ALIGN_CENTER);
@@ -81,22 +96,28 @@ void activate(GtkApplication *app, gpointer user_data) {
     gtk_box_append(GTK_BOX(signup_box), email_entry);
 
     signup_pass_entry = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(signup_pass_entry), 
-                                 "Password (min. 10 chars, 1 upper, 1 lower, 1 digit, 1 special)");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(signup_pass_entry),
+        "Password (min. 10 chars, 1 upper, 1 lower, 1 digit, 1 special)");
     gtk_entry_set_visibility(GTK_ENTRY(signup_pass_entry), FALSE);
     gtk_widget_set_size_request(signup_pass_entry, 200, -1);
     gtk_box_append(GTK_BOX(signup_box), signup_pass_entry);
+
+    // Checkbox to show password
+    signup_show_pass_check = gtk_check_button_new_with_label("Show Password");
+    gtk_box_append(GTK_BOX(signup_box), signup_show_pass_check);
+    g_signal_connect(signup_show_pass_check, "toggled",
+                     G_CALLBACK(on_signup_show_password_toggled), signup_pass_entry);
 
     signup_button = gtk_button_new_with_label("Create Account");
     gtk_widget_set_size_request(signup_button, 200, -1);
     gtk_box_append(GTK_BOX(signup_box), signup_button);
 
-    // Separator
+    // Separator between the two sections
     separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
     gtk_widget_set_vexpand(separator, TRUE);
     gtk_box_append(GTK_BOX(main_box), separator);
 
-    // Right side
+    // Login part (right side)
     right_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 15);
     gtk_widget_set_hexpand(right_box, TRUE);
     gtk_widget_set_valign(right_box, GTK_ALIGN_CENTER);
@@ -121,11 +142,17 @@ void activate(GtkApplication *app, gpointer user_data) {
     gtk_widget_set_size_request(login_pass_entry, 200, -1);
     gtk_box_append(GTK_BOX(login_box), login_pass_entry);
 
+    // Checkbox to show password
+    login_show_pass_check = gtk_check_button_new_with_label("Show Password");
+    gtk_box_append(GTK_BOX(login_box), login_show_pass_check);
+    g_signal_connect(login_show_pass_check, "toggled",
+                     G_CALLBACK(on_login_show_password_toggled), login_pass_entry);
+
     login_button = gtk_button_new_with_label("Log In");
     gtk_widget_set_size_request(login_button, 200, -1);
     gtk_box_append(GTK_BOX(login_box), login_button);
 
-    // Bottom right theme switch
+    // Bottom box for theme button
     bottom_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(bottom_box, GTK_ALIGN_END);
     gtk_widget_set_margin_end(bottom_box, 20);
