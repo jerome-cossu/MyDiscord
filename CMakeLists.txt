@@ -5,8 +5,17 @@ project(Mydiscord)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK4 REQUIRED gtk4)
 
-# Include the models directory for header files
-include_directories(models)
+# Manually specify PostgreSQL paths if find_package fails
+# Adjust the paths to where PostgreSQL is installed on your system
+set(PostgreSQL_INCLUDE_DIR "C:/msys64/ucrt64/include")
+set(PostgreSQL_LIBRARY "C:/msys64/ucrt64/lib/libpq.dll.a")
+
+# Include directories
+include_directories(
+    ${GTK4_INCLUDE_DIRS}
+    ${PostgreSQL_INCLUDE_DIR}
+    models
+)
 
 # Set source files
 set(SOURCES 
@@ -14,9 +23,12 @@ set(SOURCES
     models/home_page.c
 )
 
-# Create executable file (mydiscord.exe)
+# Create executable
 add_executable(mydiscord ${SOURCES})
 
-# Add the necessary flags for GTK4
-target_include_directories(mydiscord PRIVATE ${GTK4_INCLUDE_DIRS})
-target_link_libraries(mydiscord PRIVATE ${GTK4_LIBRARIES})
+# Link libraries
+target_link_libraries(mydiscord
+    ${GTK4_LIBRARIES}
+    ${PostgreSQL_LIBRARY}
+    regex 
+)
