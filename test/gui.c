@@ -1,14 +1,56 @@
-#include "gui.h"
+// gui.c
+#include <gtk/gtk.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <winsock2.h>    // Remplace sys/socket.h par winsock2.h
+#include <ws2tcpip.h>    // Remplace arpa/inet.h par ws2tcpip.h
 
-static void on_send_button_clicked(GtkButton *button, gpointer user_data) {
-    GtkEditable *entry = GTK_EDITABLE(user_data);  // Caster correctement en GtkEditable*
-    const char *message = gtk_editable_get_text(entry); // Fonction GTK 4 pour récupérer le texte
-    g_print("Message envoyé : %s\n", message);
-    gtk_editable_set_text(entry, ""); // Vider le champ après envoi (optionnel)
+#define SERVER_ADDR "127.0.0.1"
+#define PORT 8080
+#define BUFFER_SIZE 1024
+
+static void send_message_to_server(const char *message) {
+    WSADATA wsa;
+    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
+        printf("WSAStartup failed: %d\n", WSAGetLastError());
+        return;
+    }
+
+    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock == INVALID_SOCKET) {
+        printf("Socket creation failed: %d\n", WSAGetLastError());
+        WSACleanup();
+        return;
+    }
+
+    struct sockaddr_in server_addr;
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(PORT);
+    server_addr.sin_addr.s_addr = inet_addr(SERVER_ADDR);
+
+    if (connect(sock, (struct sockaddr *)&server_addr, sizeof(server_addr)) == SOCKET_ERROR) {
+        printf("Connection failed: %d\n", WSAGetLastError());
+        closesocket(sock);
+        WSACleanup();
+        return;
+    }
+
+    send(sock, message, strlen(message), 0);
+    closesocket(sock);
+    WSACleanup();
 }
 
+static void on_send_button_clicked(GtkButton *button, gpointer user_data) {
+    GtkEditable *entry = GTK_EDITABLE(user_data);
+    const char *message = gtk_editable_get_text(entry);
+    g_print("Message envoyé : %s\n", message);
+    
+    send_message_to_server(message);  // Envoyer le message au serveur
+    
+    gtk_editable_set_text(entry, "");  // Vider le champ de texte
+}
 
-// Callback pour fermer la fenêtre
 static void on_close_button_clicked(GtkButton *button, gpointer user_data) {
     GtkWindow *window = GTK_WINDOW(user_data);
     gtk_window_close(window);
