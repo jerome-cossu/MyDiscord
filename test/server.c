@@ -1,8 +1,6 @@
-// server.c
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PORT 8080
 #define BUFFER_SIZE 1024
@@ -42,7 +40,13 @@ int main() {
     }
 
     // Écouter les connexions entrantes
-    listen(server_fd, 3);
+    if (listen(server_fd, 3) == SOCKET_ERROR) {
+        printf("Listen failed: %d\n", WSAGetLastError());
+        closesocket(server_fd);
+        WSACleanup();
+        return 1;
+    }
+
     printf("Serveur en écoute sur le port %d...\n", PORT);
 
     // Accepter une connexion
@@ -54,19 +58,37 @@ int main() {
         return 1;
     }
 
-    printf("Client connecté: %s\n", inet_ntoa(client_addr.sin_addr));
+    printf("Client connecté.\n");
 
-    // Lire les messages du client et les renvoyer au même client
+    // Lire les messages du client
     int recv_size;
-    while ((recv_size = recv(client_fd, buffer, BUFFER_SIZE - 1, 0)) > 0) {
-        buffer[recv_size] = '\0';  // Assurer la terminaison du message
+    while (1) {
+        recv_size = recv(client_fd, buffer, BUFFER_SIZE - 1, 0);
+        if (recv_size == SOCKET_ERROR) {
+            int err_code = WSAGetLastError();
+            if (err_code == 10053) {
+                // Erreur 10053 : La connexion a été abandonnée
+                printf("Erreur de connexion : 10053, la connexion a été fermée par le client.\n");
+                break; // Sortir de la boucle, mais ne fermer pas tout de suite
+            }
+            printf("Error receiving data: %d\n", err_code);
+            break; // Sortir de la boucle si une autre erreur survient
+        }
+
+        if (recv_size == 0) {
+            printf("Le client a fermé la connexion.\n");
+            break; // Si la taille reçue est zéro, le client a fermé la connexion
+        }
+
+        buffer[recv_size] = '\0'; // Ajouter un caractère nul à la fin de la chaîne
         printf("Message reçu : %s\n", buffer);
 
-        // Renvoi du message au même client
-        send(client_fd, buffer, strlen(buffer), 0);
+        // Réponse au client
+        const char *response = "Message reçu !";
+        send(client_fd, response, strlen(response), 0);
     }
 
-    // Fermer la connexion du client
+    // Fermer les sockets
     closesocket(client_fd);
     closesocket(server_fd);
     WSACleanup();
