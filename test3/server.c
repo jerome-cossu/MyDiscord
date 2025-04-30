@@ -68,7 +68,6 @@ void send_message(char* s, int uid) {
 
 unsigned __stdcall handle_client(void* arg) {
     char buff_out[BUFFER_SZ];
-    char message[BUFFER_SZ + 64];
     char name[32];
     int leave_flag = 0;
 
@@ -80,6 +79,32 @@ unsigned __stdcall handle_client(void* arg) {
         leave_flag = 1;
     } else {
         strcpy(cli->name, name);
+
+        // Envoyer la liste des clients déjà présents
+        char list[BUFFER_SZ] = "Users currently in the chat: ";
+        int others_present = 0;
+
+        EnterCriticalSection(&clients_mutex);
+        for (int i = 0; i < MAX_CLIENTS; i++) {
+            if (clients[i] && clients[i]->uid != cli->uid) {
+                strcat(list, clients[i]->name);
+                strcat(list, ", ");
+                others_present = 1;
+            }
+        }
+        LeaveCriticalSection(&clients_mutex);
+
+        if (others_present) {
+            int len = strlen(list);
+            list[len - 2] = '\0'; // remove ", "
+            strcat(list, "\n");
+            send(cli->sockfd, list, (int)strlen(list), 0);
+        } else {
+            char* msg = "You are alone in the chatroom.\n";
+            send(cli->sockfd, msg, (int)strlen(msg), 0);
+        }
+
+        // Inform others
         sprintf(buff_out, "%s has joined\n", cli->name);
         printf("%s", buff_out);
         send_message(buff_out, cli->uid);
@@ -91,10 +116,13 @@ unsigned __stdcall handle_client(void* arg) {
         int receive = recv(cli->sockfd, buff_out, BUFFER_SZ, 0);
         if (receive > 0) {
             if (strlen(buff_out) > 0) {
-                str_trim_lf(buff_out, BUFFER_SZ);
-                sprintf(message, "%s: %s\n", cli->name, buff_out);
-                send_message(message, cli->uid);
-                printf("%s", message);
+                // Préfixer le message avec le nom de l'utilisateur
+                char msg[BUFFER_SZ + 64];
+                sprintf(msg, "%s: %s", cli->name, buff_out);
+                send_message(msg, cli->uid);
+
+                str_trim_lf(buff_out, strlen(buff_out));
+                printf("%s -> %s\n", buff_out, cli->name);
             }
         } else {
             sprintf(buff_out, "%s has left\n", cli->name);
@@ -103,7 +131,6 @@ unsigned __stdcall handle_client(void* arg) {
             leave_flag = 1;
         }
         memset(buff_out, 0, BUFFER_SZ);
-        memset(message, 0, sizeof(message));
     }
 
     closesocket(cli->sockfd);
@@ -160,7 +187,7 @@ int main(int argc, char** argv) {
         cli->uid = uid++;
 
         queue_add(cli);
-        _beginthreadex(NULL, 0, handle_client, (void*)cli, 0, NULL);
+        uintptr_t tid = _beginthreadex(NULL, 0, handle_client, (void*)cli, 0, NULL);
     }
 
     DeleteCriticalSection(&clients_mutex);
