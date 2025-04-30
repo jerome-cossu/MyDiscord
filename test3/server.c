@@ -68,6 +68,7 @@ void send_message(char* s, int uid) {
 
 unsigned __stdcall handle_client(void* arg) {
     char buff_out[BUFFER_SZ];
+    char message[BUFFER_SZ + 64];
     char name[32];
     int leave_flag = 0;
 
@@ -77,8 +78,7 @@ unsigned __stdcall handle_client(void* arg) {
     if (recv(cli->sockfd, name, 32, 0) <= 0 || strlen(name) < 2 || strlen(name) >= 31) {
         printf("Didn't enter the name.\n");
         leave_flag = 1;
-    }
-    else {
+    } else {
         strcpy(cli->name, name);
         sprintf(buff_out, "%s has joined\n", cli->name);
         printf("%s", buff_out);
@@ -91,18 +91,19 @@ unsigned __stdcall handle_client(void* arg) {
         int receive = recv(cli->sockfd, buff_out, BUFFER_SZ, 0);
         if (receive > 0) {
             if (strlen(buff_out) > 0) {
-                send_message(buff_out, cli->uid);
-                str_trim_lf(buff_out, strlen(buff_out));
-                printf("%s -> %s\n", buff_out, cli->name);
+                str_trim_lf(buff_out, BUFFER_SZ);
+                sprintf(message, "%s: %s\n", cli->name, buff_out);
+                send_message(message, cli->uid);
+                printf("%s", message);
             }
-        }
-        else {
+        } else {
             sprintf(buff_out, "%s has left\n", cli->name);
             printf("%s", buff_out);
             send_message(buff_out, cli->uid);
             leave_flag = 1;
         }
         memset(buff_out, 0, BUFFER_SZ);
+        memset(message, 0, sizeof(message));
     }
 
     closesocket(cli->sockfd);
@@ -159,7 +160,7 @@ int main(int argc, char** argv) {
         cli->uid = uid++;
 
         queue_add(cli);
-        uintptr_t tid = _beginthreadex(NULL, 0, handle_client, (void*)cli, 0, NULL);
+        _beginthreadex(NULL, 0, handle_client, (void*)cli, 0, NULL);
     }
 
     DeleteCriticalSection(&clients_mutex);
