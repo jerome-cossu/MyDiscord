@@ -1,0 +1,3 @@
+C:/Users/jerom/OneDrive/Bureau/C-C++/MyDiscord/build/CMakeFiles/mydiscord.dir
+C:/Users/jerom/OneDrive/Bureau/C-C++/MyDiscord/build/CMakeFiles/edit_cache.dir
+C:/Users/jerom/OneDrive/Bureau/C-C++/MyDiscord/build/CMakeFiles/rebuild_cache.dir
