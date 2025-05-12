@@ -32,7 +32,7 @@ int insert_user(PGconn *conn, const char *last_name, const char *first_name, con
 
     PQclear(res);
     return 1;
-
+}
 // Function to verify user credentials
 int verify_user(PGconn *conn, const char *email, const char *password) {
     const char *paramValues[2] = {email, password};
