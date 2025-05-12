@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
+
 project(Mydiscord)
 
 # Find GTK4 with pkg-config
@@ -20,3 +21,4 @@ add_executable(mydiscord ${SOURCES})
 # Add the necessary flags for GTK4
 target_include_directories(mydiscord PRIVATE ${GTK4_INCLUDE_DIRS})
 target_link_libraries(mydiscord PRIVATE ${GTK4_LIBRARIES})
+
