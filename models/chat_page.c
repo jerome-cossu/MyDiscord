@@ -1,5 +1,5 @@
 #include <gtk/gtk.h>
-#include "home_page.h"  // Inclure le fichier d'en-tête de home_page.c
+#include "home_page.h" 
 
 static gboolean is_dark_mode = TRUE;
 static void toggle_theme(GtkButton *button, gpointer user_data) {
@@ -14,10 +14,10 @@ static void on_logout_clicked(GtkButton *button, gpointer user_data) {
     GtkApplication *app = GTK_APPLICATION(user_data);
     GtkWidget *current_window = gtk_widget_get_ancestor(GTK_WIDGET(button), GTK_TYPE_WINDOW);
 
-    // Fermer la fenêtre de chat
+    // Close the chat window
     if (current_window) gtk_window_destroy(GTK_WINDOW(current_window));
 
-    // Appeler la fonction home_page_activate pour revenir à la page d'accueil
+    // Call the home_page_activate function to return to the home page
     home_page_activate(app, NULL);
 }
 
@@ -30,11 +30,11 @@ void show_chat_page(GtkWidget *widget, gpointer user_data) {
     gtk_window_set_title(GTK_WINDOW(window), "MyDiscord - Chat");
     gtk_window_set_default_size(GTK_WINDOW(window), 1000, 600);
 
-    // Layout principal horizontal
+    // Main horizontal layout
     GtkWidget *main_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_window_set_child(GTK_WINDOW(window), main_hbox);
 
-    // ----- Sidebar gauche (serveurs) -----
+    // ----- Left sidebar (servers) -----
     GtkWidget *sidebar = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     gtk_widget_set_size_request(sidebar, 60, -1);
     gtk_widget_set_margin_top(sidebar, 10);
@@ -50,7 +50,7 @@ void show_chat_page(GtkWidget *widget, gpointer user_data) {
         gtk_box_append(GTK_BOX(sidebar), server_button);
     }
 
-    // ----- Colonne centrale (liste des salons) -----
+    // ----- Center column (channel list) -----
     GtkWidget *channels_column = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     gtk_widget_set_size_request(channels_column, 200, -1);
     gtk_box_append(GTK_BOX(main_hbox), channels_column);
@@ -61,18 +61,18 @@ void show_chat_page(GtkWidget *widget, gpointer user_data) {
 
     for (int i = 0; i < 5; i++) {
         char channel_name[32];
-        snprintf(channel_name, sizeof(channel_name), "# Salon %d", i + 1);
+        snprintf(channel_name, sizeof(channel_name), "# Channel %d", i + 1);
         GtkWidget *channel_button = gtk_button_new_with_label(channel_name);
         gtk_box_append(GTK_BOX(channels_column), channel_button);
     }
 
-    // ----- Zone principale (messages + input) -----
+    // ----- Main area (messages + input) -----
     GtkWidget *main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     gtk_widget_set_vexpand(main_vbox, TRUE);
     gtk_widget_set_hexpand(main_vbox, TRUE);
     gtk_box_append(GTK_BOX(main_hbox), main_vbox);
 
-    // Zone scrollable des messages
+    // Scrollable message area
     GtkWidget *scroll = gtk_scrolled_window_new();
     gtk_widget_set_vexpand(scroll, TRUE);
     gtk_box_append(GTK_BOX(main_vbox), scroll);
@@ -82,7 +82,7 @@ void show_chat_page(GtkWidget *widget, gpointer user_data) {
     gtk_widget_set_margin_bottom(chat_box, 10);
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scroll), chat_box);
 
-    // Barre d'envoi de message
+    // Message input bar
     GtkWidget *input_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     gtk_widget_set_margin_top(input_box, 5);
     gtk_widget_set_margin_bottom(input_box, 5);
@@ -98,28 +98,28 @@ void show_chat_page(GtkWidget *widget, gpointer user_data) {
     GtkWidget *send_button = gtk_button_new_with_label("Send");
     gtk_box_append(GTK_BOX(input_box), send_button);
 
-    // ----- Conteneur vertical pour les boutons de thème et de déconnexion -----
+    // Vertical container for theme and logout buttons
     GtkWidget *footer_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-    gtk_widget_set_halign(footer_box, GTK_ALIGN_END);  // Aligner à droite
+    gtk_widget_set_halign(footer_box, GTK_ALIGN_END);  
     gtk_box_append(GTK_BOX(main_vbox), footer_box);
 
-    // ----- Bouton de thème -----
+    // Theme button
     GtkWidget *theme_button = gtk_button_new_with_label("Switch to light mode");
     gtk_widget_set_size_request(theme_button, 80, 30);
     gtk_widget_set_margin_top(theme_button, 10);
-    gtk_widget_set_margin_end(theme_button, 10);  // Taille uniforme avec le bouton de déconnexion
+    gtk_widget_set_margin_end(theme_button, 10); 
     gtk_box_append(GTK_BOX(footer_box), theme_button);
     g_signal_connect(theme_button, "clicked", G_CALLBACK(toggle_theme), NULL);
 
-    // ----- Bouton de déconnexion -----
+    // Logout button
     GtkWidget *logout_button = gtk_button_new_with_label("Log Out");
-    gtk_widget_set_size_request(logout_button, 80, 30);  // Taille uniforme avec le bouton de changement de mode
+    gtk_widget_set_size_request(logout_button, 80, 30);  // Uniform size with theme switch button
     gtk_widget_set_margin_top(logout_button, 10);
     gtk_widget_set_margin_bottom(logout_button, 10);
     gtk_widget_set_margin_end(logout_button, 10);
     gtk_box_append(GTK_BOX(footer_box), logout_button);
 
-    // Connecte le bouton "Se déconnecter" à la fonction qui ramène à la page d'accueil
+    // Connect the "Log Out" button to the function that returns to the home page
     g_signal_connect(logout_button, "clicked", G_CALLBACK(on_logout_clicked), app);
 
     gtk_window_present(GTK_WINDOW(window));

@@ -5,4 +5,4 @@
 
 void show_chat_page(GtkWidget *widget, gpointer user_data);
 
-#endif // CHAT_PAGE_H
+#endif

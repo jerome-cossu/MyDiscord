@@ -4,4 +4,4 @@
 
 void home_page_activate(GtkApplication *app, gpointer user_data);
 
-#endif // HOME_PAGE_H
+#endif 
